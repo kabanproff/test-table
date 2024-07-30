@@ -1,0 +1,103 @@
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+thead {
+  position: sticky;
+  top: 0;
+  left: 0;
+  background-color: var(--bg-color);
+  z-index: 10;
+}
+
+thead th {
+  padding-top: 5px;
+}
+
+td {
+  padding: 5px;
+  border: 1px solid #ccc;
+}
+
+td:hover {
+  border-color: black;
+  box-shadow: inset 0 0 0 1px black;
+}
+
+th {
+  writing-mode: vertical-lr;
+  transform: rotate(180deg);
+}
+
+tr:hover {
+  position: relative;
+}
+
+
+tr:hover .interface-btn {
+  visibility: visible;
+  display: flex;
+}
+
+.row-title {
+  text-wrap: nowrap;
+}
+
+.interface-btn {
+  display: none;
+  border-color: transparent;
+}
+
+.interface-cell {
+  border-color: transparent;
+  position: sticky;
+  left: 0;
+  top: 0;
+  background-color: var(--bg-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.interface-btn {
+  width: 45px;
+  height: 45px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  padding: 0;
+}
+
+.interface-btn:hover {
+  color: black;
+}
+
+.green {
+  background-color: green;
+}
+
+.red {
+  background-color: red;
+}
+
+.editionIsActive tr {
+  opacity: 0.2;
+  pointer-events: none; 
+}
+
+.editionIsActive .rowIsEdition {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.rowIsEdition .interface-btn {
+  visibility: visible;
+  display: flex;
+}
+
+.rowIsEdition td {
+  cursor: pointer;
+}

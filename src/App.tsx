@@ -1,92 +1,97 @@
-import React, { useEffect, useState } from 'react';
-import './App.css';
-import { Table } from './Table';
-import { ModalConfirm, Text } from './ModalConfitm';
-
-interface Row {
-  id: string;
-  cells: boolean[];
-  title: string;
-}
-
-interface Column {
-  id: string;
-  title: string;
-}
-
-export interface Data {
-  rows: Row[];
-  columns: Column[];
-}
+import React, { useState } from 'react';
+import { Table } from './components/table/Table';
+import { ModalConfirm, Text } from './components/modal-confirm/ModalConfitm';
+import { Data, Row } from './components/components.interfaces';
+import { useGetData, getRow } from './utils/useGetData';
 
 function App(): ReturnType<React.FC> {
-  const [data, setData] = useState<Data>({ rows: [], columns: [] });
   const [modalOpen, setModalOpen] = useState(false);
-  const [typeConfirm, setTypeConfirm] = useState(Text.Delete);
+  const [typeConfirm, setTypeConfirm] = useState('Delete');
+  const [activeRow, setActiveRow] = useState({} as Row);
+  const [activeRowEditing, setActiveRowEditing] = useState(false);
 
-  const genColls = async (colsCount: number) => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        const cols: Column[] = Array.from({ length: colsCount }, (_, i) => ({
-          id: generateId(i).toString(),
-          title: `Обработка ${i + 1}`,
-        }));
+  const [data, setData] = useGetData() as [
+    Data,
+    React.Dispatch<React.SetStateAction<Data>>,
+  ];
 
-        resolve(cols);
-      }, 1500);
-    });
+  const addRow = () => {
+    const newRow = getRow(data.columns.length)(null, data.rows.length);
+
+    setData(prevData => ({
+      ...prevData,
+      rows: [...prevData.rows, newRow as Row],
+    }));
   };
 
-  const getRows = async (rowsCount: number, colsCount: number) => {
-    return new Promise<Row[]>(resolve => {
-      setTimeout(() => {
-        const rows: Row[] = Array.from({ length: rowsCount }, (_, i) => ({
-          id: generateId(i).toString(),
-          title: `Заказ ${i + 1}`,
-          cells: Array.from({ length: colsCount }, () => {
-            return Math.random() > 0.5;
-          }),
-        }));
-        resolve(rows);
-      }, 1500);
-    });
+  const editRowHandler = async (row: Row) => {
+    if (activeRowEditing) {
+      setModalOpen(true);
+      return;
+    }
+    setTypeConfirm('Edit');
+    setActiveRow(row);
+    setActiveRowEditing(true);
   };
 
-  useEffect(() => {
-    getData();
-  }, []);
-
-  const getRandNums = () => Math.floor(Math.random() * 100) + 2;
-  const generateId = (i: number) => new Date().getTime() + i;
-
-  const getData = async () => {
-    const randCols = getRandNums();
-    const randRows = getRandNums();
-    const columnsPromise = genColls(randCols);
-    const rowsPromise = getRows(randRows, randCols);
-
-    const [columns, rows] = (await Promise.all([
-      columnsPromise,
-      rowsPromise,
-    ])) as [Column[], Row[]];
-    console.log(columns, rows);
-
-    setData({ columns, rows });
-  };
-
-  const addRow = async () => {};
-
-  const editRow = async (rowId: string) => {
-    setTypeConfirm(Text.Edit);
+  const deleteRowHandler = async (row: Row) => {
+    setTypeConfirm('Delete');
+    setActiveRow(row);
     setModalOpen(true);
+  };
+
+  const cleanState = () => {
+    setActiveRowEditing(false);
+    setActiveRow({} as Row);
+    setModalOpen(false);
+  };
+
+  const handlerCancel = () => {
+    if (activeRowEditing) {
+      console.log(activeRow.cells);
+      setData(prevData => {
+        return {
+          ...prevData,
+          rows: prevData.rows.map(row => {
+            console.log(row);
+
+            if (row.id === activeRow.id) {
+              console.log(row);
+
+              return {
+                ...activeRow,
+              };
+            }
+            return row;
+          }),
+        };
+      });
+    }
+    cleanState();
+  };
+
+  const handlerConfirm = () => {
+    if (typeConfirm === 'Delete') {
+      setData(prevData => {
+        return {
+          ...prevData,
+          rows: prevData.rows.filter(row => row.id !== activeRow.id),
+        };
+      });
+    }
+    cleanState();
+  };
+
+  const handlerCell = (ind: number) => {
+    if (!activeRowEditing) return;
+
     setData(prevData => ({
       ...prevData,
       rows: prevData.rows.map(row => {
-        if (row.id === rowId) {
+        if (row.id === activeRow.id) {
           return {
             ...row,
-            // Todo добавить логику редактирования
-            cells: [],
+            cells: row.cells.map((cell, i) => (i === ind ? !cell : cell)),
           };
         }
         return row;
@@ -94,25 +99,25 @@ function App(): ReturnType<React.FC> {
     }));
   };
 
-  const deleteRow = async (rowId: string) => {
-    setTypeConfirm(Text.Delete);
-    setModalOpen(true);
-    setData(prevData => ({
-      ...prevData,
-      rows: prevData.rows.filter(row => row.id !== rowId.toString()),
-    }));
-  };
-
   return (
     <>
-      <Table data={data} deleteRow={deleteRow} editRow={editRow} />
-      <button onClick={addRow}>Добавить строку</button>
-
+      <Table
+        data={data}
+        deleteRowHandler={deleteRowHandler}
+        editRowHandler={editRowHandler}
+        activeRowEditing={activeRowEditing}
+        activeRow={activeRow}
+        handlerCell={handlerCell}
+      />
+      {data.rows.length !== 0 && (
+        <button onClick={addRow}>Добавить строку</button>
+      )}
       <ModalConfirm
-        handlerCancel={() => setModalOpen(false)}
-        handlerConfirm={() => setModalOpen(false)}
+        handlerCancel={handlerCancel}
+        handlerConfirm={handlerConfirm}
         modalOpen={modalOpen}
-        text="Edit"
+        order={activeRow.title}
+        text={typeConfirm as keyof typeof Text}
       />
     </>
   );
