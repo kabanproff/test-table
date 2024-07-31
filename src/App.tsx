@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Table } from './components/table/Table';
-import { ModalConfirm, Text } from './components/modal-confirm/ModalConfitm';
+import { ModalConfirm } from './components/modal-confirm/ModalConfitm';
 import { Data, Row } from './components/components.interfaces';
 import { useGetData, getRow } from './utils/useGetData';
 
@@ -117,7 +117,7 @@ function App(): ReturnType<React.FC> {
         handlerConfirm={handlerConfirm}
         modalOpen={modalOpen}
         order={activeRow.title}
-        text={typeConfirm as keyof typeof Text}
+        text={typeConfirm}
       />
     </>
   );

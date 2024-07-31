@@ -2,7 +2,7 @@ import styles from './modalConfirm.module.css';
 import { Text } from '../components.interfaces.ts';
 
 type Props = {
-  text: keyof typeof Text;
+  text: string;
   order?: string;
   modalOpen: boolean;
   handlerConfirm: () => void;
@@ -19,7 +19,7 @@ export const ModalConfirm = (props: Props) => {
           &times;
         </span>
         <p>
-          {Text[props.text]}
+          {Text[props.text as keyof typeof Text]}
           <br />
           {props.order}
         </p>
