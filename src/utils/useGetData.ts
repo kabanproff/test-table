@@ -20,13 +20,13 @@ const getRows = async (rowsCount: number, colsCount: number) => {
   });
 };
 
-export const getRow = (colsCount: number, bools?: boolean) => {
+export const getRow = (colsCount: number, bools: boolean) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (_: any, i: number) => ({
     id: generateId(i).toString(),
     title: `Заказ ${i + 1}`,
     cells: Array.from({ length: colsCount }, () => {
-      return bools && Math.random() > 0.5;
+      return bools ? Math.random() > 0.5 : false;
     }),
   });
 };

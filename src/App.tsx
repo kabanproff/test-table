@@ -16,7 +16,7 @@ function App(): ReturnType<React.FC> {
   ];
 
   const addRow = () => {
-    const newRow = getRow(data.columns.length)(null, data.rows.length);
+    const newRow = getRow(data.columns.length, false)(null, data.rows.length);
 
     setData(prevData => ({
       ...prevData,
